@@ -8,6 +8,7 @@ let bodyParser = require('body-parser');
 let path = require('path');
 let fs = require('fs');
 let minimist = require('minimist');
+let JSONfn = require('json-fn');
 
 module.exports = {
   name: 'ember-cli-fastboot-testing',
@@ -81,7 +82,7 @@ module.exports = {
         response: {},
       };
 
-      let options = Object.assign(defaultOptions, req.body.options);
+      let options = Object.assign(defaultOptions, JSONfn.parse(req.body.options));
 
       res.set('x-fastboot-testing', true);
 
@@ -175,5 +176,10 @@ module.exports = {
     }, options);
 
     this.fastboot = new FastBoot(fastbootOptions);
+
+    // In test config, you can define a function `setupFastboot` to have access to the fastboot instance
+    if (options.setupFastboot && typeof options.setupFastboot === 'function') {
+      options.setupFastboot(this.fastboot);
+    }
   }
 };
